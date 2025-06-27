@@ -10,9 +10,10 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
-from pathlib import Path
 
 import os
+from pathlib import Path
+from datetime import timedelta
 import logging
 from dotenv import load_dotenv
 load_dotenv()
@@ -30,9 +31,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+DEBUG = os.getenv("DJANGO_DEBUG", "False").lower() in ("true", "1")
+
+ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost").split(",")
 
 
 # Application definition
@@ -147,6 +149,8 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
     'rest_framework.permissions.IsAuthenticated',
     ],
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 10,
 }
 
 
@@ -155,6 +159,7 @@ CORS_ALLOW_ALL_ORIGINS = True #For development only! Use whitelist in production
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000", #React/ Vite
     "http://127.0.0.1:3000",
+    "True",
 ]
 
 LOGGING = {
@@ -168,4 +173,26 @@ LOGGING = {
         'handlers': ['console'],
         'level': 'INFO',
     },
+}
+
+# Internationalization
+LANGUAGE_CODE = "en-us"
+TIME_ZONE = "Africa/Nairobi"
+USE_I18N = True
+USE_TZ = True
+
+#Stantic files
+STATIC_URL = "static/"
+STATICFILES_DIRS = [BASE_DIR/ "static"]
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
+
+#Simple JWT COmfig
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=86400),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }

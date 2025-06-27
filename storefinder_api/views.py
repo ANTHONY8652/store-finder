@@ -2,9 +2,12 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status, viewsets, permissions
+from rest_framework import status, viewsets, permissions, filters
+from .permissions import IsAdminOrReadOnly
 from .mock_data import stores
-import math
+from rest_framework.decorators import action
+import math 
+from math import  radians, cos, sin, asin, sqrt
 from .serializers import StoreSerializer
 from .models import Store
 import logging
@@ -96,5 +99,48 @@ class ProductSearchView(APIView):
 class StoreViewSet(viewsets.ModelViewSet):
     queryset = Store.objects.all()
     serializer_class = StoreSerializer
+    filter_backends = [filters.SearchFilter]
+    permission_classes = [IsAdminOrReadOnly]
+    search_fields = ['name']
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+    def get_queryset(self):
+        queryset = Store.objects.all()
+        category = self.request.query_params.get('category')
+        if category:
+            queryset = queryset.filter(category__iexact=category)
+        return queryset
+
+    @action(detail=False, methods=['get'])
+    def nearby(self, request):
+        try:
+            user_latitude = float(request.query_params.get("latitude"))
+            user_longitude = float(request.query_params.get("longitude"))
+        
+        except (TypeError, ValueError):
+            return Response({"error": "Latitude and longitude are required as valid floats"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        def haversine(latitude1, longitude1, latitude2, longitude2):
+            #Convert decimal degrees to radians
+            latitude1, longitude1, latitude2, longitude2 = map(radians, [latitude1, longitude1, latitude2, longitude2])
+            dlongitude = longitude2 - longitude1
+            dlatitude = latitude2 - latitude1
+            a = sin(dlatitude / 2) ** 2 + cos(latitude1) * cos(latitude2) * sin(dlongitude / 2) ** 2
+            c = 2 * asin(sqrt(a))
+            r = 6371 #Radius of the earth in Kolometas
+            return r * c
+        
+        stores_with_distance = []
+        for store in self.get_queryset():
+            distance = haversine(user_latitude, user_longitude, store.latitude, store.longitude)
+            stores_with_distance.append((distance, store))
+
+        stores_with_distance.sort(key=lambda x: x[0])
+        sorted_stores = [s[1] for s in stores_with_distance]
+        serializer = self.get_serializer(sorted_stores, many=True)
+
+        return Response(serializer.data)
 
 # Create your views here.
