@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'storefinder_api',
     'corsheaders',
     'drf_yasg',
+    'review',
 ]
 
 MIDDLEWARE = [

@@ -41,4 +41,5 @@ urlpatterns = [
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-with-ui'),
     path('api/auth/token/', TokenObtainPairView.as_view(), name="token-obtain-pair"),
     path('api/auth/token/refresh/', TokenRefreshView.as_view(), name='token-refresh'),
+    path('', include('review.urls')),
 ]
