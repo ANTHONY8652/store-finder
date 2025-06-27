@@ -159,7 +159,6 @@ CORS_ALLOW_ALL_ORIGINS = True #For development only! Use whitelist in production
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000", #React/ Vite
     "http://127.0.0.1:3000",
-    "True",
 ]
 
 LOGGING = {

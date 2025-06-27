@@ -8,8 +8,8 @@ from .mock_data import stores
 from rest_framework.decorators import action
 import math 
 from math import  radians, cos, sin, asin, sqrt
-from .serializers import StoreSerializer
-from .models import Store
+from .serializers import StoreSerializer, CategorySerializer
+from .models import Store, Category
 import logging
 
 
@@ -142,5 +142,11 @@ class StoreViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(sorted_stores, many=True)
 
         return Response(serializer.data)
+
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = {permissions.IsAuthenticatedOrReadOnly}
 
 # Create your views here.

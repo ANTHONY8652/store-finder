@@ -1,11 +1,12 @@
 from .models import Store, Category
-from rest_framework import serializers
+from rest_framework import serializers, permissions
 from django.contrib.auth import get_user_model
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ['id', 'name']
+        permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 class StoreSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
