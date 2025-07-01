@@ -34,7 +34,9 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 
 DEBUG = os.getenv("DJANGO_DEBUG", "False").lower() in ("true", "1")
 
-ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost").split(",")
+#
+ALLOWED_HOSTS = ()
+#ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost").split(",")
 
 
 # Application definition
@@ -53,7 +55,9 @@ INSTALLED_APPS = [
     'corsheaders',
     'drf_yasg',
     'review',
+
 ]
+
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',

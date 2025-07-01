@@ -14,6 +14,8 @@ class StoreSerializer(serializers.ModelSerializer):
         queryset=Category.objects.all(), source='category', write_only=True
     )
     owner = serializers.StringRelatedField(read_only=True)
+    average_rating = serializers.SerializerMethodField()
+    reviews = serializers.Serializer
 
     class Meta:
         model = Store
@@ -25,12 +27,23 @@ class StoreSerializer(serializers.ModelSerializer):
             'latitude',
             'longitude',
             'opening_hours',
-            'is_active',
             'created_at',
             'updated_at',
             'owner',
             'category',
-            'category_id'
+            'category_id',
+            'average_rating',
+            'reviews'
 
         ]
         read_only_fields = ['slug', 'created_at', 'updated_at', 'owner']
+
+    def averate_rating(self, obj):
+        reviews = obj.reviews.all()
+        if not reviews:
+            return None
+        return round(sum(r.rating for r in reviews) / reviews.count(), 1)
+    
+    def get_reviews(self, obj):
+        from review.serializers import ReviewSerializer
+        return ReviewSerializer(obj.reviews.all(), many=True).data

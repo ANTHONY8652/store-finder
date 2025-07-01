@@ -3,7 +3,7 @@ from storefinder_api.models import Store
 from django.contrib.auth import get_user_model
 
 class Review(models.Model):
-    store = models.ForeignKey('storefinder_api.Store', on_delete=models.CASCADE, related_name='stores')
+    store = models.ForeignKey('storefinder_api.Store', on_delete=models.CASCADE, related_name='reviews')
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='users')
     comment = models.TextField()
     rating = models.PositiveSmallIntegerField() #1 to 5 or 10 to be decuded baadae

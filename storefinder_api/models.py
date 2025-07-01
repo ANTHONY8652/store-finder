@@ -22,7 +22,7 @@ class Store(models.Model):
     address = models.TextField()
     city = models.CharField(max_length=100)
     owner = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, null=True, blank=True, related_name="stores")
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="Categories")
+    #category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="Categories")
     latitude = models.FloatField(validators=[MinValueValidator(-90.0), MaxValueValidator(90.0)])
     longitude = models.FloatField(validators=[MinValueValidator(-180.0), MaxValueValidator(180.0)])
     opening_hours = models.CharField(max_length=100, default="8:00 AM - 7:00PM")
@@ -33,7 +33,7 @@ class Store(models.Model):
         ordering = ['-created_at']
         indexes = [
             models.Index(fields=['slug']),
-            models.Index(fields=['category']),
+            #models.Index(fields=['category']),
         ]
 
     def __str__(self):

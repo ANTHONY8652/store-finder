@@ -4,7 +4,7 @@ from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
 
-router.register(r'reviews', ReviewViewSet)
+router.register(r'', ReviewViewSet)
 
 
 urlpatterns = [
