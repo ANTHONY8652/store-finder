@@ -17,7 +17,7 @@ def product_list(request):
             products = recent
         
         else:
-            call_command('scrape_sites', search_term=term)
+            call_command('scrape_site', search_term=term)
             products = Product.objects.filter(search_term=term)
     
     else:

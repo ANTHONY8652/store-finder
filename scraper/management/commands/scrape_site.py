@@ -7,6 +7,18 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 import time
 
+def clean_price(price_str):
+    try:
+        price_str = price_str.replace("Ksh", "").replace("KSH", "").replace("KSh", "")
+        price_str = price_str.replace(",", "").replace(" ", "").strip()
+        if price_str == "":
+            return None
+     
+        return float(price_str)
+        
+    except (ValueError, AttributeError):
+            return None
+
 class Command(BaseCommand):
     help = 'Scrape Jumia, Quickmart and Naivas for search term or product needed.'
 
@@ -15,9 +27,10 @@ class Command(BaseCommand):
 
     def set_up_driver(self):
         opts = Options()
-        opts.add_argument('--headless')
+        #opts.add_argument('--headless')
         opts.add_argument('--disable-gpu')
         opts.add_argument('--no-sandbox')
+        opts.add_argument('--disable-software-rasterizer')
         
         return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options = opts)
     
@@ -26,7 +39,7 @@ class Command(BaseCommand):
         driver  = self.set_up_driver()
 
         try:
-            self.scrape_jumia(driver, term)
+            #self.scrape_jumia(driver, term)
             self.scrape_quickmart(driver, term)
             self.scrape_naivas(driver, term)
         
@@ -34,10 +47,12 @@ class Command(BaseCommand):
             driver.quit()
         
         self.stdout.write(self.style.SUCCESS(f"Searching for {term} completed."))
+            
 
-    #SCraping Jumia is to only be used for research purposes and development phase and there arent a lot of known and reliable stores in Kenya Kilimall is great but fails in fields of customer satisfaction as well as order fulfillment and in that case we will only use jumia but when development is complete 
-    #Jumia isn't in the official scope of the project it falls right outside the scope of the project sadly Usisahau kuitoa when done Anto please do not foget
+#Jumia is not in thw final scope of the project it also keep throttling me and rate limiting me I am done with it
 
+
+    """
     def scrape_jumia(self, driver, term):
         if not term:
             return 
@@ -51,7 +66,7 @@ class Command(BaseCommand):
                 name = item.find_element(By.CSS_SELECTOR, '.info .name').text
                 price_text = item.find_element(By.CSS_SELECTOR, '.info .prc').text
                 url = item.find_element(By.TAG_NAME, 'a').get_attribute('href')
-                price = float(price_text.replace('Ksh', '').replace(',', '').strip())
+                price = clean_price(price_text)
 
                 Product.objects.update_or_create(
                     product_url=url,
@@ -63,41 +78,48 @@ class Command(BaseCommand):
             
             except Exception as e:
                 self.stderr.write(f"Jumia perse error: {e}")
+    """  
     
     def scrape_quickmart(self, driver, term):
         if not term:
             return
         self.stdout.write("Scraping Quickmart please wait....")
-        driver.get(f"https://quickmart.co.ke/shop/?s={term}&post_type=product")
+        driver.get(f"https://quickmart.co.ke/products/search?keyword-{term}&pagesize-10")
 
         time.sleep(5)
-        
-        for item in driver.find_elements(By.CSS_SELECTOR, "li.product"):
 
-            try: 
-                name = item.find_element(By.CSS_SELECTOR, "h2.woocommerce-loop-product__title").text
-                price_text = item.find_element(By.CSS_SELECTOR, ".price .amount").text
-                url = item.find_element(By.CSS_SELECTOR, "a.woocommerce-LoopProduct-link").get_attribute('href')
-                price = float(price_text.replace('Ksh', '').replace(',', '').strip())
-                
+        containers = driver.find_elements(By.CLASS_NAME, "products-foot")
+        
+        for container in containers:
+            try:
+                link = container.find_element(By.CLASS_NAME, "products-title")
+                name = link.text
+                url = link.get_attribute("href")
+
+                price_element = container.field_element(By.CLASS_NAME, "product-price")
+                raw_price = price_element.text.strip()
+                price = clean_price(raw_price)
+            
                 Product.objects.update_or_create(
                     product_url = url,
-                    defaults={
-                        'name': name,
-                        'price': price,
-                        'source_site': 'Quickmart',
-                        'search_term': term
+                    defaults = {
+                        "name": name,
+                        "price": price,
+                        "source_site": "Quickmart",
+                        "search_term": term
                     }
                 )
+                self.stdout.write(f"Saved: {name} - {price}")
             
             except Exception as e:
-                self.stderr.write(f"Quickmart parse error: {e}")
+                self.stderr.write(f"Error parsing product: {e}")
+          
     
     def scrape_naivas(self, driver, term):
         if not term:
             return
-        self.stdout.write("Scrapig Naivas Supermarket....")
-        driver.get(f"https://naivas.online/?s={term}&post_type=product")
+        self.stdout.write("Scraping Naivas Supermarket....")
+        driver.get(f"https://naivas.online/search?term={term}")
 
         time.sleep(5)
 
@@ -107,7 +129,7 @@ class Command(BaseCommand):
                 name = item.find_element(By.CSS_SELECTOR, "h2.woocommerce-loop-product__title").text
                 price_text  = item.find_element(By.CSS_SELECTOR, ".price .amount").text
                 url = item.find_element(By.TAG_NAME, "a").get_attribute("href")
-                price = float(price_text.replace('Ksh', '').replace(',', '').strip())
+                price = clean_price(price_text)
 
                 Product.objects.update_or_create(
                     product_url = url,
@@ -120,5 +142,3 @@ class Command(BaseCommand):
                 )
             except Exception as e:
                 self.stderr.write(f"Naivas parse erra: {e}")
-            
-
