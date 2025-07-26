@@ -1,0 +1,13 @@
+{% include "scraper/search.html" %}
+
+<h1>Products{% if search_term %} for "{{ search_term }}"{% endif %}</h1>
+<ul>
+  {% for product in products %}
+    <li>
+      <a href="{{ product.product_url }}" target="_blank">{{ product.name }}</a>
+      – KSh {{ product.price }} ({{ product.source_site }})
+    </li>
+  {% empty %}
+    <li>No products found.</li>
+  {% endfor %}
+</ul>
