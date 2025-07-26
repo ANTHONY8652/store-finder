@@ -12,5 +12,5 @@ urlpatterns = [
     path('nearest-stores/', NearestStoresView.as_view(), name='nearest-stores'),
     path('product-search/', ProductSearchView.as_view(), name='product-search'),
     path('', include(router.urls)),
-    path('category', include(router.urls)),
+    path('', include(router.urls)),
 ]
