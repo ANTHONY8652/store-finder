@@ -49,7 +49,7 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(f"Searching for {term} completed."))
             
 
-#Jumia is not in thw final scope of the project it also keep throttling me and rate limiting me I am done with it
+#Jumia is not in thw final scope of the project it also keeps throttling me and rate limiting me I am done with it
 
 
     """
@@ -84,9 +84,9 @@ class Command(BaseCommand):
         if not term:
             return
         self.stdout.write("Scraping Quickmart please wait....")
-        driver.get(f"https://quickmart.co.ke/products/search?keyword-{term}&pagesize-10")
+        driver.get(f"https://quickmart.co.ke/products/search?keyword-{term}&pagesize-5")
 
-        time.sleep(5)
+        time.sleep(3)
 
         containers = driver.find_elements(By.CLASS_NAME, "products-foot")
         
@@ -121,7 +121,7 @@ class Command(BaseCommand):
         self.stdout.write("Scraping Naivas Supermarket....")
         driver.get(f"https://naivas.online/search?term={term}")
 
-        time.sleep(5)
+        time.sleep(3)
 
         for item in driver.find_elements(By.CSS_SELECTOR, "li.product"):
             
@@ -142,3 +142,27 @@ class Command(BaseCommand):
                 )
             except Exception as e:
                 self.stderr.write(f"Naivas parse erra: {e}")
+
+
+def main():
+    opts = Options()
+    opts.add_argument("--headless") ##RUns without graphical user interface
+    driver = webdriver.Chrome(Options=opts)
+    driver.get("https://naivas.online.com")
+
+    #EExtract the title and save the screenshot
+    print(driver.title)
+    driver.save_screenshot("page.png")
+
+    #Example element extraction
+    links = driver.find_elements(By.TAG_NAME, "a")
+    for link in links[:5]:
+        text = link.text.strip()
+        href = link.get_attribute("href")
+        print(f"{text}: {href}")
+
+    driver.quit()
+
+if __name__ == "__main__":
+    main()
+
